@@ -1,9 +1,9 @@
 import Koa, { Context, Next } from "koa"
 import parser from "@koa/bodyparser"
-import Router from "@koa/router"
 import json from "koa-json"
 import KoaLogger from "koa-logger"
 import cors from "@koa/cors"
+import { APIrouters } from "./router/api"
 
 async function setXrespTime(ctx: Context, next: Next) {
     const start = Date.now()
@@ -12,18 +12,9 @@ async function setXrespTime(ctx: Context, next: Next) {
     ctx.set("X-Response-Time", `${ms}ms`)
 }
 
-// response
-async function hello(ctx: Context) {
-    console.log(JSON.parse(JSON.stringify(ctx.request.query)))
-    console.log(ctx.request.body)
-    let x = 10 / 0
-    // throw "test error handle"
-    ctx.body = { ok: "fine" }
-}
-
-function main(port: number) {
+export function main(port: number) {
     const app = new Koa()
-    const router = new Router({ prefix: "/api" })
+
     app.use(
         parser({
             enableTypes: ["json"],
@@ -39,13 +30,9 @@ function main(port: number) {
         .use(json({ pretty: false }))
         .use(KoaLogger())
         .use(cors())
-    router.post("/hello", hello)
-
+    let router = APIrouters()
     app.use(router.routes()).use(router.allowedMethods())
-
     app.listen(port, () => {
         console.log(`🚀 Server listening http://0.0.0.0:${port}/ 🚀`)
     })
 }
-
-main(3000)
